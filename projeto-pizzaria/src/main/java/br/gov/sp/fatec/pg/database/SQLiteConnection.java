@@ -6,7 +6,7 @@ import java.sql.Statement;
 
 public class SQLiteConnection {
     // String da conexao com o banco
-    private static final String URL = "jdbc:sqlite:users.db";
+    private static final String URL = "jdbc:sqlite:pizzaria.db";
 
     public static Connection connect() throws Exception{
         return DriverManager.getConnection(URL);
