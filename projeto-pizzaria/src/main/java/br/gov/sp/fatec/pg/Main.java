@@ -10,7 +10,6 @@ import io.javalin.Javalin;
 
 public class Main {
     public static void main(String[] args) {
-
         // Criando/Verificando banco de dados
         SQLiteConnection.createDatabase();
 
@@ -21,6 +20,28 @@ public class Main {
         // Rota base
         app.get("/", ctx -> {
             ctx.result("Projeto Javalin no Ar");
+        });
+
+        app.before("/*", ctx -> {
+            // Pegando o cabeçalho
+            String token = ctx.header("Authorization");
+
+            if(token == null){
+                ctx.status(401).result("Cabeçalho Inexistente");
+                ctx.json("Erro");
+                ctx.skipRemainingHandlers();
+                return;
+            }
+
+            Employee employee = EmployeeRepository.getEmployeeByToken(token);
+
+            if(employee == null){
+                ctx.status(403).result("Token Inválido");
+                ctx.skipRemainingHandlers();
+                return;
+            }
+
+            System.out.println("Autorizado: " + employee.getName());
         });
 
         // Login do funcionário
@@ -46,7 +67,11 @@ public class Main {
 
             Employee employee = EmployeeRepository.getEmployee(cpf);
 
-            ctx.json(Map.of("cpf", employee.getCpf(), "nome", employee.getName(), "senha", employee.getPassword()));
+            if(employee != null){
+                ctx.json(Map.of("cpf", employee.getCpf(), "nome", employee.getName(), "senha", employee.getPassword()));
+            }else{
+                ctx.result("Funcionário não encontrado");
+            }
         });
 
         // Endpoint para adicionar funcionário
