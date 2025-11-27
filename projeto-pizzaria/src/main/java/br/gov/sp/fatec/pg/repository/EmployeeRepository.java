@@ -33,7 +33,26 @@ public class EmployeeRepository {
             
             pstmt.executeUpdate();
         }
-    }    
+    }
+
+    public static Employee getEmployeeByToken(String token) throws Exception {
+        String query = "SELECT * FROM funcionario WHERE token = ?";
+
+        try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setString(1, token);
+            
+            ResultSet rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                Employee employee = new Employee();
+                employee.setName(rs.getString("nm_funcionario"));
+                
+                return employee;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Cria um funcionário no banco de dados
