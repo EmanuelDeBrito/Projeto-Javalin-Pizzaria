@@ -24,6 +24,17 @@ public class EmployeeRepository {
         return false;
     }
 
+    public static void updateToken(Integer cpf, String token) throws Exception{
+        String query = "UPDATE FROM funcionario SET token = ? WHERE cd_cpf_funcionario = ?";
+
+        try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setString(1, token);
+            pstmt.setInt(2, cpf);
+            
+            pstmt.executeUpdate();
+        }
+    }    
+
     /**
      * Cria um funcionário no banco de dados
      * @param employee Objeto de um funcionário
