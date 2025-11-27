@@ -8,6 +8,22 @@ import br.gov.sp.fatec.pg.database.SQLiteConnection;
 import br.gov.sp.fatec.pg.model.Employee;
 
 public class EmployeeRepository {
+    public static boolean validateEmployee(Integer cpf, String password) throws Exception{
+        String query = "SELECT COUNT(*) FROM funcionario WHERE cd_cpf_funcionario = ? AND nm_senha_funcionario = ?";
+
+        try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
+            pstmt.setInt(1, cpf);
+            pstmt.setString(2, password);
+            
+            ResultSet rs =  pstmt.executeQuery();
+            if(rs.next()){
+                return rs.getInt(1) > 0;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Cria um funcionário no banco de dados
      * @param employee Objeto de um funcionário
