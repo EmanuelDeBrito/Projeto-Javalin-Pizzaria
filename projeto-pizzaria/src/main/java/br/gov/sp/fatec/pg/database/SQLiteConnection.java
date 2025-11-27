@@ -21,7 +21,8 @@ public class SQLiteConnection {
             "cd_funcionario INTEGER PRIMARY KEY AUTOINCREMENT, " + 
             "cd_cpf_funcionario INTEGER UNIQUE NOT NULL, " +
             "nm_funcionario TEXT NOT NULL, " +
-            "nm_senha_funcionario TEXT NOT NULL" + 
+            "nm_senha_funcionario TEXT NOT NULL, " + 
+            "token TEXT" +
         ")";
         
         // Tabela do produto

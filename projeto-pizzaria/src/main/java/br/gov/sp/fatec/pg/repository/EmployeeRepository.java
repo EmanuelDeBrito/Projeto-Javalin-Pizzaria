@@ -25,7 +25,7 @@ public class EmployeeRepository {
     }
 
     public static void updateToken(Integer cpf, String token) throws Exception{
-        String query = "UPDATE FROM funcionario SET token = ? WHERE cd_cpf_funcionario = ?";
+        String query = "UPDATE funcionario SET token = ? WHERE cd_cpf_funcionario = ?";
 
         try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setString(1, token);
@@ -83,16 +83,20 @@ public class EmployeeRepository {
         try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setInt(1, cpf);
         
-            ResultSet result = pstmt.executeQuery();
+            ResultSet rs = pstmt.executeQuery();
 
-            Integer cpfBusca = result.getInt("cd_cpf_funcionario");
-            String nome = result.getString("nm_funcionario");
-            String senha = result.getString("nm_senha_funcionario");
+            if(rs.next()){
+                Integer cpfBusca = rs.getInt("cd_cpf_funcionario");
+                String nome = rs.getString("nm_funcionario");
+                String senha = rs.getString("nm_senha_funcionario");
 
-            Employee employeeSearched = new Employee(cpfBusca, nome, senha);
+                Employee employeeSearched = new Employee(cpfBusca, nome, senha);
 
-            return employeeSearched;
+                return employeeSearched;
+            }
         }
+
+        return null;
     }
 
     /**
