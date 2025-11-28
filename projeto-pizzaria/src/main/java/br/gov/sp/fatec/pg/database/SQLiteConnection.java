@@ -48,12 +48,12 @@ public class SQLiteConnection {
         // Tabela do Item no Pedido
         String orderItemTable = 
         "CREATE TABLE IF NOT EXISTS item_pedido (" + 
-            "cd_pedido INTEGER, " + 
+            "cd_funcionario INTEGER, " + 
             "cd_produto INTEGER, " + 
             "vl_item_pedido REAL NOT NULL, " + 
             "qt_item_pedido INTEGER NOT NULL DEFAULT 1, " +
             "PRIMARY KEY (cd_pedido, cd_produto), " +
-            "FOREIGN KEY (cd_pedido) REFERENCES pedido (cd_pedido), " +
+            "FOREIGN KEY (cd_funcionario) REFERENCES funcionario (cd_funcionario), " +
             "FOREIGN KEY (cd_produto) REFERENCES produto (cd_produto)" +
         ")";
 

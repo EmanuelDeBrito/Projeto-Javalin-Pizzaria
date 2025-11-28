@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import br.gov.sp.fatec.pg.database.SQLiteConnection;
 import br.gov.sp.fatec.pg.model.Employee;
+import br.gov.sp.fatec.pg.model.Product;
 import br.gov.sp.fatec.pg.repository.EmployeeRepository;
+import br.gov.sp.fatec.pg.repository.ProductRepository;
 import io.javalin.Javalin;
 
 public class Main {
@@ -22,7 +24,7 @@ public class Main {
             ctx.result("Projeto Javalin no Ar");
         });
 
-        app.before("/*", ctx -> {
+        app.before("/api/*", ctx -> {
             // Pegando o cabeçalho
             String token = ctx.header("Authorization");
 
@@ -44,8 +46,20 @@ public class Main {
             System.out.println("Autorizado: " + employee.getName());
         });
 
+        // Endpoint para adicionar funcionário
+        app.post("/signup", ctx -> {
+            Employee employee = ctx.bodyAsClass(Employee.class);
+
+            try{
+                EmployeeRepository.createEmployee(employee);
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                System.out.println("Erro: " + e);
+            }
+        });
+
         // Login do funcionário
-        app.post("/funcionario/login", ctx -> {
+        app.post("/login", ctx -> {
             Employee employee = ctx.bodyAsClass(Employee.class);
 
             if(EmployeeRepository.validateEmployee(employee.getCpf(), employee.getPassword())){
@@ -62,7 +76,7 @@ public class Main {
         });
 
         // Endpoint para selecionar um funcionário
-        app.get("/funcionario/{cpf}", ctx -> {
+        app.get("/api/funcionario/{cpf}", ctx -> {
             Integer cpf = Integer.parseInt(ctx.pathParam("cpf"));
 
             Employee employee = EmployeeRepository.getEmployee(cpf);
@@ -74,26 +88,39 @@ public class Main {
             }
         });
 
-        // Endpoint para adicionar funcionário
-        app.post("/funcionario", ctx -> {
-            Employee employee = ctx.bodyAsClass(Employee.class);
-
-            try{
-                EmployeeRepository.createEmployee(employee);
-                ctx.json(Map.of("success", "true"));
-            }catch(Exception e){
-                System.out.println("Erro: " + e);
-            }
-        });
-
         // Endpoint para remover funcionário
-        app.delete("/funcionario/{cpf}", ctx -> {
+        app.delete("/api/funcionario/{cpf}", ctx -> {
             Integer cpf = Integer.parseInt(ctx.pathParam("cpf"));
 
             if(EmployeeRepository.deleteEmployee(cpf)){
                 ctx.json(Map.of("success", "true"));
             }else{
                 ctx.result("Usuário não encontrado");
+            }
+        });
+
+        app.post("/api/produto", ctx -> {
+            Product product = ctx.bodyAsClass(Product.class);
+
+            try{
+                ProductRepository.createProduct(product);
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                System.out.println("Erro: " + e);
+            }
+        });
+
+        app.get("/api/produto/{id}", ctx -> {
+            Integer id = Integer.parseInt(ctx.pathParam("id"));
+
+            Product product = ProductRepository.getProduct(id);
+
+            System.out.println(product);
+
+            if(product != null){
+                ctx.json(Map.of("imagem", product.getImage(), "nome", product.getName(), "descricao", product.getDescription(), "preco", product.getPrice()));
+            }else{
+                ctx.result("Produto não encontrado");
             }
         });
     }
