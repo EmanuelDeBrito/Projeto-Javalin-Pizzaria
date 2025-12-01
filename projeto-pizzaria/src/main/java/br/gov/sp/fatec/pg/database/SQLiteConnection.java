@@ -40,8 +40,8 @@ public class SQLiteConnection {
         "CREATE TABLE IF NOT EXISTS carrinho (" + 
             "cd_funcionario INTEGER, " + 
             "cd_produto INTEGER, " + 
-            "vl_item_pedido REAL NOT NULL, " + 
-            "qt_item_pedido INTEGER NOT NULL DEFAULT 1, " +
+            "vl_carrinho REAL NOT NULL, " + 
+            "qt_carrinho INTEGER NOT NULL DEFAULT 1, " +
             "PRIMARY KEY (cd_funcionario, cd_produto), " +
             "FOREIGN KEY (cd_funcionario) REFERENCES funcionario (cd_funcionario), " +
             "FOREIGN KEY (cd_produto) REFERENCES produto (cd_produto)" +

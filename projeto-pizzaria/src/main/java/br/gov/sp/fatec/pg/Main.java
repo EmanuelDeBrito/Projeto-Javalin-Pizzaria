@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import br.gov.sp.fatec.pg.database.SQLiteConnection;
+import br.gov.sp.fatec.pg.model.Cart;
 import br.gov.sp.fatec.pg.model.Employee;
 import br.gov.sp.fatec.pg.model.Order;
 import br.gov.sp.fatec.pg.model.Product;
+import br.gov.sp.fatec.pg.repository.CartRepository;
 import br.gov.sp.fatec.pg.repository.EmployeeRepository;
 import br.gov.sp.fatec.pg.repository.OrderRepository;
 import br.gov.sp.fatec.pg.repository.ProductRepository;
@@ -138,6 +140,33 @@ public class Main {
             }else{
                 ctx.json(Map.of("success", "false"));
                 ctx.result("Produto não encontrado");
+            }
+        });
+
+        // Endpoint para criar um item no carrinho
+        app.post("/api/carrinho", ctx -> {
+            Cart cart = ctx.bodyAsClass(Cart.class);
+
+            try{
+                CartRepository.createCart(cart.getCdEmployee(), cart.getCdProduct(), cart.getValue());
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
+                System.out.println("Erro: " + e);
+            }
+        });
+
+        // Endpoint para pegar todos os itens no carrinho do funcionário
+        app.get("api/carrinho/{idFuncionario}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+
+            List<Cart> cart = CartRepository.getCartByEmployee(employeeId);
+
+            if(cart.size() > 0){
+                ctx.json(cart);
+            }else{
+                ctx.json(Map.of("success", "false"));
+                ctx.result("Sem nenhum pedido no carrinho");
             }
         });
 
