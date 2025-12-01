@@ -1,12 +1,15 @@
 package br.gov.sp.fatec.pg;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import br.gov.sp.fatec.pg.database.SQLiteConnection;
 import br.gov.sp.fatec.pg.model.Employee;
+import br.gov.sp.fatec.pg.model.Order;
 import br.gov.sp.fatec.pg.model.Product;
 import br.gov.sp.fatec.pg.repository.EmployeeRepository;
+import br.gov.sp.fatec.pg.repository.OrderRepository;
 import br.gov.sp.fatec.pg.repository.ProductRepository;
 import io.javalin.Javalin;
 
@@ -18,7 +21,7 @@ public class Main {
 
         // Criando app
         Javalin app = Javalin.create().start(7070);
-        System.out.println("Javalin rodando com sucesso!");
+        System.out.println("Bem vindo ao Pizza Note!");
 
         // Rota base
         app.get("/", ctx -> {
@@ -135,6 +138,59 @@ public class Main {
             }else{
                 ctx.json(Map.of("success", "false"));
                 ctx.result("Produto não encontrado");
+            }
+        });
+
+        // Endpoint para criar um pedido
+        app.post("/api/pedido", ctx -> {
+            Order order = ctx.bodyAsClass(Order.class);
+
+            try{
+                OrderRepository.createOrder(order);
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
+                System.out.println("Erro: " + e);
+            }
+        });
+
+        // Endpoint para pegar todos os pedidos de um funcionário específico
+        app.get("/api/pedido/{idFuncionario}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+
+            List<Order> orders = OrderRepository.getOrdersByEmployee(employeeId);
+
+            if(orders.size() > 0){
+                ctx.json(orders);
+            }else{
+                ctx.json(Map.of("success", "false"));
+                ctx.result("Sem nenhum pedido anotado");
+            }
+        });
+
+        // Endpoint para marcar um pedido como entregue
+        app.patch("/api/pedido/entregue/{idPedido}", ctx -> {
+            Integer orderId = Integer.parseInt(ctx.pathParam("idPedido"));
+
+            try{
+                OrderRepository.markAsDelivered(orderId);
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
+                System.out.println("Erro: " + e);
+            }
+        });
+
+        // Endpoint para deletar um pedido
+        app.delete("/api/pedido/{idPedido}", ctx -> {
+            Integer orderId = Integer.parseInt(ctx.pathParam("idPedido"));
+
+            try{
+                OrderRepository.deleteOrder(orderId);
+                ctx.json(Map.of("success", "true"));
+            }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
+                System.out.println("Erro: " + e);
             }
         });
     }

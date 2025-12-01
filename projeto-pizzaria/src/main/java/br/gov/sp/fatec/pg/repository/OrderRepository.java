@@ -48,7 +48,7 @@ public class OrderRepository {
     }
 
     public static void markAsDelivered(Integer orderCd) throws Exception{
-        String query = "UPDATE pedido SET ic_entregue_pedido = ? WHERE cd_pedido = ?";
+        String query = "UPDATE pedido SET ic_entregue_pedido = 1 WHERE cd_pedido = ?";
 
         try(Connection conn = SQLiteConnection.connect(); PreparedStatement pstmt = conn.prepareStatement(query)){
             pstmt.setInt(1, orderCd);

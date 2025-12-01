@@ -65,6 +65,7 @@ public class SQLiteConnection {
             stmt.execute(productTable);
             stmt.execute(cartTable);
             stmt.execute(orderTable);
+            stmt.execute("PRAGMA foreign_keys = ON;");
 
             // Exibindo mensagem de verificação
             System.out.println("Database criada/verificada com sucesso!");
