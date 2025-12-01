@@ -12,6 +12,7 @@ import io.javalin.Javalin;
 
 public class Main {
     public static void main(String[] args) {
+        
         // Criando/Verificando banco de dados
         SQLiteConnection.createDatabase();
 
@@ -28,15 +29,18 @@ public class Main {
             // Pegando o cabeçalho
             String token = ctx.header("Authorization");
 
+            // Verificando se o token é null
             if(token == null){
                 ctx.status(401).result("Cabeçalho Inexistente");
                 ctx.json("Erro");
                 ctx.skipRemainingHandlers();
                 return;
             }
-
+            
+            // Pegando o funcionário pelo token
             Employee employee = EmployeeRepository.getEmployeeByToken(token);
 
+            // Verificando se o funcionário existe
             if(employee == null){
                 ctx.status(403).result("Token Inválido");
                 ctx.skipRemainingHandlers();
@@ -48,17 +52,19 @@ public class Main {
 
         // Endpoint para adicionar funcionário
         app.post("/signup", ctx -> {
+            // Pegando o corpo da requisição
             Employee employee = ctx.bodyAsClass(Employee.class);
 
             try{
                 EmployeeRepository.createEmployee(employee);
                 ctx.json(Map.of("success", "true"));
             }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
                 System.out.println("Erro: " + e);
             }
         });
 
-        // Login do funcionário
+        // Endpoint para login do funcionário
         app.post("/login", ctx -> {
             Employee employee = ctx.bodyAsClass(Employee.class);
 
@@ -69,8 +75,10 @@ public class Main {
                 // Atualizando token do funcionário no banco de dados
                 EmployeeRepository.updateToken(employee.getCpf(), token);
 
+                // Enviando token para o usuário
                 ctx.json(Map.of("token", token));
             }else{
+                ctx.json(Map.of("success", "false"));
                 ctx.result("Credenciais inválidas");
             }
         });
@@ -84,6 +92,7 @@ public class Main {
             if(employee != null){
                 ctx.json(Map.of("cpf", employee.getCpf(), "nome", employee.getName(), "senha", employee.getPassword()));
             }else{
+                ctx.json(Map.of("success", "true"));
                 ctx.result("Funcionário não encontrado");
             }
         });
@@ -95,10 +104,12 @@ public class Main {
             if(EmployeeRepository.deleteEmployee(cpf)){
                 ctx.json(Map.of("success", "true"));
             }else{
+                ctx.json(Map.of("success", "false"));
                 ctx.result("Usuário não encontrado");
             }
         });
 
+        // Endpoint para adicionar um produto
         app.post("/api/produto", ctx -> {
             Product product = ctx.bodyAsClass(Product.class);
 
@@ -106,10 +117,12 @@ public class Main {
                 ProductRepository.createProduct(product);
                 ctx.json(Map.of("success", "true"));
             }catch(Exception e){
+                ctx.json(Map.of("success", "false"));
                 System.out.println("Erro: " + e);
             }
         });
 
+        // Endpoint para pegar um produto
         app.get("/api/produto/{id}", ctx -> {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
 
@@ -120,6 +133,7 @@ public class Main {
             if(product != null){
                 ctx.json(Map.of("imagem", product.getImage(), "nome", product.getName(), "descricao", product.getDescription(), "preco", product.getPrice()));
             }else{
+                ctx.json(Map.of("success", "false"));
                 ctx.result("Produto não encontrado");
             }
         });

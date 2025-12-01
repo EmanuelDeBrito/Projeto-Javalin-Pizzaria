@@ -35,26 +35,27 @@ public class SQLiteConnection {
             "vl_produto REAL NOT NULL" +
         ")";
 
+        // Tabela do Carrinho
+        String cartTable = 
+        "CREATE TABLE IF NOT EXISTS carrinho (" + 
+            "cd_funcionario INTEGER, " + 
+            "cd_produto INTEGER, " + 
+            "vl_item_pedido REAL NOT NULL, " + 
+            "qt_item_pedido INTEGER NOT NULL DEFAULT 1, " +
+            "PRIMARY KEY (cd_funcionario, cd_produto), " +
+            "FOREIGN KEY (cd_funcionario) REFERENCES funcionario (cd_funcionario), " +
+            "FOREIGN KEY (cd_produto) REFERENCES produto (cd_produto)" +
+        ")";
+
         // Tabela do pedido
         String orderTable = 
         "CREATE TABLE IF NOT EXISTS pedido (" + 
             "cd_pedido INTEGER PRIMARY KEY AUTOINCREMENT, " +
             "cd_funcionario INTEGER, " +
-            "vl_total_pedido REAL NOT NULL DEFAULT 0, " + 
-            "nm_cliente TEXT NOT NULL, " +
+            "vl_total_pedido REAL NOT NULL DEFAULT 0, " +
+            "ic_entregue_pedido INTEGER NOT NULL DEFAULT 0, " + 
+            "nm_cliente_pedido TEXT NOT NULL, " +
             "FOREIGN KEY (cd_funcionario) REFERENCES funcionario (cd_funcionario)" + 
-        ")";
-
-        // Tabela do Item no Pedido
-        String orderItemTable = 
-        "CREATE TABLE IF NOT EXISTS item_pedido (" + 
-            "cd_funcionario INTEGER, " + 
-            "cd_produto INTEGER, " + 
-            "vl_item_pedido REAL NOT NULL, " + 
-            "qt_item_pedido INTEGER NOT NULL DEFAULT 1, " +
-            "PRIMARY KEY (cd_pedido, cd_produto), " +
-            "FOREIGN KEY (cd_funcionario) REFERENCES funcionario (cd_funcionario), " +
-            "FOREIGN KEY (cd_produto) REFERENCES produto (cd_produto)" +
         ")";
 
         // Criando as tabelas
@@ -62,8 +63,8 @@ public class SQLiteConnection {
             // Executando os scripts das tabelas
             stmt.execute(employeeTable);
             stmt.execute(productTable);
+            stmt.execute(cartTable);
             stmt.execute(orderTable);
-            stmt.execute(orderItemTable);
 
             // Exibindo mensagem de verificação
             System.out.println("Database criada/verificada com sucesso!");
