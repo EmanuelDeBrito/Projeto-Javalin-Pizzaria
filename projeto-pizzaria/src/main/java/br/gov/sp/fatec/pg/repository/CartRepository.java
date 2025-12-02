@@ -35,12 +35,34 @@ public class CartRepository {
         return cartList;
     }
 
-    public static void createCart(Integer cdProduct, Integer cdEmployee, Float value) throws Exception {
-        String sql = "INSERT INTO carrinho (cd_produto, cd_funcionario, vl_carrinho, qt_carrinho) VALUES(?, ?, ?, 1)";
+    public static Cart getCartItem(Integer employeeId, Integer productId) throws Exception {
+        String sql = "SELECT * FROM carrinho WHERE cd_funcionario = ? AND cd_produto = ?";
+        Cart cart = new Cart();
+
+        try(Connection conn = SQLiteConnection.connect(); PreparedStatement Pstmt = conn.prepareStatement(sql)) {
+            Pstmt.setInt(1, employeeId);
+            Pstmt.setInt(2, productId);
+
+            ResultSet rs = Pstmt.executeQuery();
+            if (rs == null) {
+                return null;
+            } else {
+                cart.setCdEmployee(rs.getInt("cd_funcionario"));
+                cart.setCdProduct(rs.getInt("cd_produto"));
+                cart.setValue(rs.getFloat("vl_carrinho"));
+                cart.setQuantity(rs.getInt("qt_carrinho"));
+            }
+        }
+
+        return cart;
+    }
+
+    public static void createCart(Integer cdEmployee, Integer cdProduct, Float value) throws Exception {
+        String sql = "INSERT INTO carrinho (cd_funcionario, cd_produto, vl_carrinho, qt_carrinho) VALUES(?, ?, ?, 1)";
         
         try(Connection conn = SQLiteConnection.connect(); PreparedStatement Pstmt = conn.prepareStatement(sql)) {
-            Pstmt.setInt(1, cdProduct);
-            Pstmt.setInt(2, cdEmployee);
+            Pstmt.setInt(1, cdEmployee);
+            Pstmt.setInt(2, cdProduct);
             Pstmt.setFloat(3, value);
             
             Pstmt.executeUpdate();
@@ -72,7 +94,7 @@ public class CartRepository {
     }
 
     public static void decrementCart(Integer cdEmployee, Integer cdProduct) throws Exception {
-        // Função que ira incrementar a quantidade do produto no carrinho do funcionario.
+        // Função que ira decrementar a quantidade do produto no carrinho do funcionario.
         String sql = "SELECT qt_carrinho FROM carrinho WHERE cd_funcionario = ? AND cd_produto = ?";
         int qt;
         try (Connection conn = SQLiteConnection.connect(); PreparedStatement Pstmt = conn.prepareStatement(sql)) {

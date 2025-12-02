@@ -22,7 +22,13 @@ public class Main {
         SQLiteConnection.createDatabase();
 
         // Criando app
-        Javalin app = Javalin.create().start(7070);
+        Javalin app = Javalin.create(config -> {
+            config.bundledPlugins.enableCors(cors -> {
+                cors.addRule(it -> {
+                    it.anyHost(); // Permite todas as origens
+                });
+            });
+        }).start(7070);
         System.out.println("Bem vindo ao Pizza Note!");
 
         // Rota base
@@ -143,6 +149,18 @@ public class Main {
             }
         });
 
+        // Endpoint para pegar todos os produtos
+        app.get("/api/produto", ctx -> {
+            List<Product> products = ProductRepository.getAllProducts();
+
+            try {
+                ctx.json(products);
+            } catch (Exception e) {
+                ctx.json(Map.of("success", "false"));
+                ctx.result("Erro: " + e);
+            }
+        });
+
         // Endpoint para criar um item no carrinho
         app.post("/api/carrinho", ctx -> {
             Cart cart = ctx.bodyAsClass(Cart.class);
@@ -157,16 +175,77 @@ public class Main {
         });
 
         // Endpoint para pegar todos os itens no carrinho do funcionário
-        app.get("api/carrinho/{idFuncionario}", ctx -> {
+        app.get("/api/carrinho/{idFuncionario}", ctx -> {
             Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
 
             List<Cart> cart = CartRepository.getCartByEmployee(employeeId);
-
+            try {
             if(cart.size() > 0){
                 ctx.json(cart);
             }else{
                 ctx.json(Map.of("success", "false"));
                 ctx.result("Sem nenhum pedido no carrinho");
+            }
+            } catch (Exception e) {
+                ctx.json(Map.of("success", "false"));
+                ctx.result("Erro: " + e);
+            }
+        });
+
+        // Endpoint para incrementar um item no carrinho do funcionário
+        app.patch("/api/carrinho/incrementar/{idFuncionario}&{idProduto}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+            Integer productId = Integer.parseInt(ctx.pathParam("idProduto"));
+
+            try {
+                CartRepository.incrementCart(employeeId, productId);
+                ctx.json(Map.of("sucess", "true"));
+            } catch (Exception e) {
+                ctx.json(Map.of("sucess", "false"));
+                ctx.result("Item do carrinho não encontrado");
+            }
+
+        });
+
+        // Endpoint para decrementar um item no carrinho do funcionário
+        app.patch("/api/carrinho/decrementar/{idFuncionario}&{idProduto}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+            Integer productId = Integer.parseInt(ctx.pathParam("idProduto"));
+
+            try {
+                CartRepository.decrementCart(employeeId, productId);
+                ctx.json(Map.of("sucess", "true"));
+            } catch (Exception e) {
+                ctx.json(Map.of("sucess", "false"));
+                ctx.result("Item do carrinho não encontrado");
+            }
+
+        });
+
+        // Endpoint para deletar um item do carrinho
+        app.delete("/api/carrinho/{idFuncionario}&{idProduto}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+            Integer productId = Integer.parseInt(ctx.pathParam("idProduto"));
+
+            try {
+                CartRepository.deleteCart(productId, employeeId);
+                ctx.json(Map.of("sucess", "true"));
+            } catch (Exception e) {
+                ctx.json(Map.of("sucess", "false"));
+                ctx.result("Erro: " + e);
+            }
+        });
+
+        // Endpoint para deletar um carrinho por funcionário
+        app.delete("/api/carrinho/{idFuncionario}", ctx -> {
+            Integer employeeId = Integer.parseInt(ctx.pathParam("idFuncionario"));
+
+            try {
+                CartRepository.deleteCartByEmployee(employeeId);
+                ctx.json(Map.of("sucess", "true"));
+            } catch(Exception e) {
+                ctx.json(Map.of("sucess", "false"));
+                ctx.result("Erro: " + e);
             }
         });
 

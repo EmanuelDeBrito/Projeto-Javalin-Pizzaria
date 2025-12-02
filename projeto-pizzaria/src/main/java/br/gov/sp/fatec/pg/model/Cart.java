@@ -10,8 +10,8 @@ public class Cart {
     public Cart(){}
 
     public Cart(Integer cdEmployee, Integer cdProduct, Float value, Integer quantity) {
-        this.cdProduct = cdProduct;
         this.cdEmployee = cdEmployee;
+        this.cdProduct = cdProduct;
         this.value = value;
         this.quantity = quantity;
     }
